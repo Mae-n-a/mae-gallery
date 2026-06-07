@@ -1,0 +1,76 @@
+---
+import { portfolio } from '../data/portfolio';
+const { email, location } = portfolio;
+---
+
+<section id="contact">
+  <div class="sec-head reveal">
+    <div><div class="sec-num">04 — Enquiries</div><div class="sec-title">Contact</div></div>
+    <div class="right">For acquisitions, exhibitions & studio visits.</div>
+  </div>
+  <div class="contact-grid">
+    <div class="lead reveal">
+      Tell me about your project, or simply say hello.<br /><br />
+      {location}<br />
+      <a href={`mailto:${email}`}>{email}</a>
+    </div>
+
+    <form class="reveal" id="formB" method="post" action="/api/contact" novalidate>
+      <div class="field">
+        <label for="cf-name">Your Name</label>
+        <input id="cf-name" name="name" type="text" autocomplete="name" required />
+      </div>
+      <div class="field">
+        <label for="cf-mail">Your Mail</label>
+        <input id="cf-mail" name="email" type="email" autocomplete="email" required />
+      </div>
+      <div class="field">
+        <label for="cf-msg">Your Message</label>
+        <textarea id="cf-msg" name="message" rows="3" required></textarea>
+      </div>
+      <!-- Honeypot: bots fill it, humans never see it. -->
+      <div class="sr-only" aria-hidden="true">
+        <label for="cf-company">Company</label>
+        <input id="cf-company" name="company" type="text" tabindex="-1" autocomplete="off" />
+      </div>
+      <button class="submit" type="submit">Send Message</button>
+      <p class="form-status" id="formStatus" role="status" aria-live="polite"></p>
+    </form>
+  </div>
+</section>
+
+<script>
+  const form = document.getElementById('formB') as HTMLFormElement | null;
+  const status = document.getElementById('formStatus')!;
+  const btn = form?.querySelector<HTMLButtonElement>('.submit');
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+    status.dataset.state = '';
+    status.textContent = '';
+    if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+
+    try {
+      const res = await fetch(form.action, {
+        method: 'POST',
+        headers: { Accept: 'application/json' },
+        body: new FormData(form),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (btn) btn.textContent = 'Sent ✓';
+      status.textContent = 'Thank you — your message is on its way.';
+      form.reset();
+      setTimeout(() => {
+        if (btn) { btn.disabled = false; btn.textContent = 'Send Message'; }
+      }, 2200);
+    } catch (err) {
+      if (btn) { btn.disabled = false; btn.textContent = 'Send Message'; }
+      status.dataset.state = 'error';
+      status.textContent = 'Something went wrong. Please email hello@mae.gallery directly.';
+    }
+  });
+</script>

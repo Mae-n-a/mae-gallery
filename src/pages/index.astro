@@ -1,0 +1,43 @@
+---
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import Hero from '../components/Hero.astro';
+import Gallery from '../components/Gallery.astro';
+import About from '../components/About.astro';
+import Contact from '../components/Contact.astro';
+import Lightbox from '../components/Lightbox.astro';
+---
+
+<Base>
+  <Nav />
+  <div class="wrap">
+    <Hero />
+  </div>
+  <div class="wrap">
+    <Gallery />
+    <About />
+    <Contact />
+  </div>
+  <Lightbox />
+</Base>
+
+<script>
+  // Reveal-on-scroll. Reduced-motion users get everything shown immediately (see CSS).
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const els = document.querySelectorAll('.reveal');
+  if (reduce) {
+    els.forEach((el) => el.classList.add('in'));
+  } else {
+    const io = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in');
+            io.unobserve(entry.target);
+          }
+        }),
+      { threshold: 0.12 }
+    );
+    els.forEach((el) => io.observe(el));
+  }
+</script>

@@ -1,0 +1,11 @@
+# Normalize text line endings (repo deploys on Linux/Cloudflare).
+* text=auto eol=lf
+
+# Treat images and other binaries as binary (no EOL conversion / diffs).
+*.jpg binary
+*.jpeg binary
+*.png binary
+*.gif binary
+*.webp binary
+*.avif binary
+*.ico binary

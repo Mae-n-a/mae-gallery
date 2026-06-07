@@ -1,0 +1,47 @@
+---
+import { portfolio } from '../data/portfolio';
+
+const links = [
+  { n: '01', label: 'Home', href: '#home' },
+  { n: '02', label: 'Gallery', href: '#gallery' },
+  { n: '03', label: 'About', href: '#about' },
+  { n: '04', label: 'Contact', href: '#contact' },
+];
+---
+
+<header class="nav" id="nav">
+  <a href="#home" class="brand">{portfolio.name}</a>
+  <nav id="navmenu" aria-label="Primary">
+    <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="navlist">Index</button>
+    <ul id="navlist">
+      {links.map((l) => (
+        <li>
+          <a href={l.href}><span class="n">{l.n}</span> {l.label}</a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+</header>
+
+<script>
+  const nav = document.getElementById('nav')!;
+  const navmenu = document.getElementById('navmenu')!;
+  const menuBtn = document.getElementById('menuBtn')!;
+
+  // Sticky header gains a background once scrolled past the hero edge.
+  const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 40);
+  onScroll();
+  addEventListener('scroll', onScroll, { passive: true });
+
+  // Mobile dropdown toggle.
+  menuBtn.addEventListener('click', () => {
+    const open = navmenu.classList.toggle('open');
+    menuBtn.setAttribute('aria-expanded', String(open));
+  });
+  navmenu.querySelectorAll('a').forEach((a) =>
+    a.addEventListener('click', () => {
+      navmenu.classList.remove('open');
+      menuBtn.setAttribute('aria-expanded', 'false');
+    })
+  );
+</script>

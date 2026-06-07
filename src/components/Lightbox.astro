@@ -1,0 +1,144 @@
+---
+import { portfolio } from '../data/portfolio';
+
+// Minimal data the client viewer needs.
+const viewerData = portfolio.collections.map((c) => ({
+  title: c.title,
+  years: c.years,
+  works: c.works.map((w) => ({
+    title: w.title,
+    year: w.year,
+    medium: w.medium,
+    dim: w.dim,
+    ratio: w.ratio,
+    img: w.img,
+  })),
+}));
+---
+
+<div class="viewer" id="viewerB" role="dialog" aria-modal="true" aria-label="Artwork viewer" aria-hidden="true">
+  <div class="vtop">
+    <div class="vname" id="vName"></div>
+    <button class="vclose" id="vClose" type="button">Close ✕</button>
+  </div>
+  <div class="vstage">
+    <button class="varrow" id="vPrev" type="button" aria-label="Previous work">‹</button>
+    <div class="vframe-wrap">
+      <figure class="vframe" id="vFrame">
+        <img id="vImg" alt="" />
+      </figure>
+    </div>
+    <button class="varrow" id="vNext" type="button" aria-label="Next work">›</button>
+  </div>
+  <div class="vbottom">
+    <div>
+      <div class="t" id="vTitle"></div>
+      <div class="d" id="vDim"></div>
+    </div>
+    <div class="vdots" id="vDots" role="tablist" aria-label="Works in series"></div>
+  </div>
+</div>
+
+<script type="application/json" id="viewerData" set:html={JSON.stringify(viewerData)}></script>
+
+<script>
+  type Work = { title: string; year: string; medium: string; dim: string | null; ratio: number; img: string };
+  type Coll = { title: string; years: string; works: Work[] };
+
+  const data: Coll[] = JSON.parse(document.getElementById('viewerData')!.textContent || '[]');
+
+  const viewer = document.getElementById('viewerB')!;
+  const vName = document.getElementById('vName')!;
+  const vFrame = document.getElementById('vFrame') as HTMLElement;
+  const vImg = document.getElementById('vImg') as HTMLImageElement;
+  const vTitle = document.getElementById('vTitle')!;
+  const vDim = document.getElementById('vDim')!;
+  const vDots = document.getElementById('vDots')!;
+  const vClose = document.getElementById('vClose')!;
+  const vPrev = document.getElementById('vPrev')!;
+  const vNext = document.getElementById('vNext')!;
+
+  let curC = 0;
+  let curW = 0;
+  let lastFocused: HTMLElement | null = null;
+
+  function render() {
+    const c = data[curC];
+    const w = c.works[curW];
+    vName.innerHTML = `${c.title} <em>${c.years}</em>`;
+    vFrame.style.aspectRatio = String(w.ratio);
+    vFrame.style.height = 'auto';
+    // Tall works fit the viewport height; wide works are capped at 86vw.
+    vFrame.style.width = `min(86vw, ${(64 * w.ratio).toFixed(1)}vh)`;
+    vImg.src = w.img;
+    vImg.alt = `${w.title}, ${w.year}`;
+    vTitle.textContent = w.title;
+    vDim.textContent = [w.medium, w.dim, w.year].filter(Boolean).join(' · ');
+
+    vDots.innerHTML = c.works
+      .map(
+        (_, i) =>
+          `<button type="button" role="tab" class="${i === curW ? 'on' : ''}" aria-label="Work ${i + 1}" aria-selected="${i === curW}" data-i="${i}"></button>`
+      )
+      .join('');
+    vDots.querySelectorAll<HTMLButtonElement>('button').forEach((d) => {
+      d.addEventListener('click', () => {
+        curW = Number(d.dataset.i);
+        render();
+      });
+    });
+  }
+
+  function open(ci: number, wi: number) {
+    lastFocused = document.activeElement as HTMLElement;
+    curC = ci;
+    curW = wi;
+    render();
+    viewer.classList.add('open');
+    viewer.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    vClose.focus();
+  }
+
+  function close() {
+    viewer.classList.remove('open');
+    viewer.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    lastFocused?.focus();
+  }
+
+  function step(n: number) {
+    const len = data[curC].works.length;
+    curW = (curW + n + len) % len;
+    render();
+  }
+
+  document.addEventListener('open-lightbox', (e) => {
+    const { collectionIndex, workIndex } = (e as CustomEvent).detail;
+    open(collectionIndex, workIndex);
+  });
+
+  vClose.addEventListener('click', close);
+  vPrev.addEventListener('click', () => step(-1));
+  vNext.addEventListener('click', () => step(1));
+
+  document.addEventListener('keydown', (e) => {
+    if (!viewer.classList.contains('open')) return;
+    if (e.key === 'Escape') close();
+    else if (e.key === 'ArrowLeft') step(-1);
+    else if (e.key === 'ArrowRight') step(1);
+    else if (e.key === 'Tab') {
+      // Trap focus within the open dialog.
+      const focusable = viewer.querySelectorAll<HTMLElement>('button');
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  });
+</script>

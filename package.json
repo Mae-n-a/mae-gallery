@@ -1,0 +1,23 @@
+{
+  "name": "mae-gallery",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Mae — Artist Portfolio (Editorial direction). Astro static site.",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "cf-dev": "astro build && wrangler dev",
+    "deploy": "astro build && wrangler deploy"
+  },
+  "dependencies": {
+    "astro": "^4.16.18",
+    "mimetext": "^3.0.28"
+  },
+  "devDependencies": {
+    "wrangler": "^4.98.0"
+  }
+}

@@ -1,0 +1,34 @@
+---
+import { portfolio } from '../data/portfolio';
+const { statement, education, exhibitions } = portfolio;
+---
+
+<section id="about">
+  <div class="sec-head reveal">
+    <div><div class="sec-num">03 — Biography</div><div class="sec-title">About</div></div>
+    <div class="right">Tehran → Milan. Trained between two academies.</div>
+  </div>
+  <div class="about-grid">
+    <p class="statement reveal">{statement}</p>
+    <div class="cv reveal">
+      <h4>Education</h4>
+      <div>
+        {education.map((r) => (
+          <div class="cv-row">
+            <div class="y">{r.year}</div>
+            <div class="t">{r.text}<span>{r.place}</span></div>
+          </div>
+        ))}
+      </div>
+      <h4>Exhibitions</h4>
+      <div>
+        {exhibitions.map((r) => (
+          <div class="cv-row">
+            <div class="y">{r.year}</div>
+            <div class="t">{r.text}<span>{r.place}</span></div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>

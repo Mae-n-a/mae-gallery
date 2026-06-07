@@ -1,0 +1,32 @@
+---
+import { portfolio } from '../data/portfolio';
+const { name, location, photo } = portfolio;
+---
+
+<section class="hero" id="home">
+  <div class="hero-left">
+    <div class="kicker mono"><span class="ln"></span><span>Visual Artist — Acrylic Painting</span></div>
+    <!-- The name renders visible by default; JS only adds the staggered entrance. -->
+    <h1 class="hero-name" id="heroName" aria-label={name}>
+      {name.split('').map((ch) => <span aria-hidden="true">{ch}</span>)}
+    </h1>
+    <div class="hero-meta">
+      <div><div class="lbl mono">Based in</div><p>{location}</p></div>
+      <div><div class="lbl mono">Practice</div><p>Painting bodies and landscapes caught mid-collapse.</p></div>
+      <div><div class="lbl mono">Series</div><p>Four bodies of work, 2012—2021.</p></div>
+    </div>
+  </div>
+  <div class="hero-right">
+    <img class="portrait" src={photo} alt={`Portrait of ${name}`} width="600" height="800" loading="eager" />
+  </div>
+</section>
+
+<script>
+  const hn = document.getElementById('heroName');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (hn && !reduce) {
+    const spans = [...hn.querySelectorAll('span')];
+    spans.forEach((s) => s.classList.add('pre'));
+    spans.forEach((s, i) => setTimeout(() => s.classList.remove('pre'), 200 + i * 90));
+  }
+</script>

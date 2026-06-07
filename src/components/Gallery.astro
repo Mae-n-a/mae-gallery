@@ -1,0 +1,65 @@
+---
+import { portfolio } from '../data/portfolio';
+const { collections } = portfolio;
+---
+
+<section id="gallery">
+  <div class="sec-head reveal">
+    <div><div class="sec-num">02 — Selected Works</div><div class="sec-title">Gallery</div></div>
+    <div class="right">Four series in acrylic. Click any title to enter the series.</div>
+  </div>
+
+  <div id="indexB">
+    {collections.map((c, ci) => (
+      <button
+        class="index-row reveal"
+        type="button"
+        data-collection={ci}
+        data-cover={c.cover}
+        aria-label={`Open ${c.title} series, ${c.works.length} works`}
+      >
+        <span class="arrow" aria-hidden="true">→</span>
+        <span class="idx">{String(ci + 1).padStart(2, '0')}</span>
+        <span class="ttl">{c.title}<span class="blurb">{c.blurb}</span></span>
+        <span class="meta"><span class="yr">{c.years}</span><span class="ct">{c.works.length} works</span></span>
+      </button>
+    ))}
+  </div>
+</section>
+
+<!-- Cursor-following cover preview (decorative; disabled on touch). -->
+<div class="float-prev" id="floatPrev" aria-hidden="true"></div>
+
+<script>
+  const fp = document.getElementById('floatPrev')!;
+  const rows = document.querySelectorAll<HTMLButtonElement>('.index-row');
+  // Coarse pointers (touch) get no cursor preview.
+  const fine = matchMedia('(pointer: fine)').matches;
+
+  rows.forEach((row) => {
+    const ci = Number(row.dataset.collection);
+    row.addEventListener('click', () => {
+      document.dispatchEvent(
+        new CustomEvent('open-lightbox', { detail: { collectionIndex: ci, workIndex: 0 } })
+      );
+    });
+    if (fine) {
+      row.addEventListener('mouseenter', () => {
+        fp.style.backgroundImage = `url("${row.dataset.cover}")`;
+        fp.classList.add('show');
+      });
+      row.addEventListener('mouseleave', () => fp.classList.remove('show'));
+    }
+  });
+
+  if (fine) {
+    addEventListener(
+      'mousemove',
+      (e) => {
+        fp.style.left = e.clientX + 'px';
+        fp.style.top = e.clientY + 'px';
+      },
+      { passive: true }
+    );
+  }
+</script>

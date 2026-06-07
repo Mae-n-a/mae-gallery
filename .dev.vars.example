@@ -1,0 +1,6 @@
+# Copy to `.dev.vars` (git-ignored) for local `wrangler dev`.
+# In production these live in wrangler.toml [vars] or the Cloudflare dashboard.
+# Native send_email also needs a [[send_email]] binding + a custom domain
+# (see wrangler.toml) — it won't actually deliver on *.workers.dev.
+CONTACT_TO=hello@mae.gallery
+CONTACT_FROM=noreply@mae.gallery
