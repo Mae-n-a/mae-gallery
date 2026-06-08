@@ -6,6 +6,12 @@ name = "mae-gallery"
 main = "src/worker.js"
 compatibility_date = "2025-01-01"
 
+# Serve the site on the apex domain (Cloudflare provisions the DNS record + TLS
+# cert automatically on deploy). The domain's zone must be on this account.
+routes = [
+  { pattern = "mae.gallery", custom_domain = true },
+]
+
 # Serve the Astro build output. Matching files are returned before the Worker
 # runs; the Worker handles /api/contact and any unmatched path.
 [assets]
@@ -13,22 +19,18 @@ directory = "./dist"
 binding = "ASSETS"
 
 # Where contact-form enquiries are emailed, and the sender address.
-# CONTACT_TO must be a VERIFIED Email Routing destination address.
-# CONTACT_FROM must be on a domain that has Email Routing enabled.
+# CONTACT_TO must be a VERIFIED Email Routing destination address (matches the
+# send_email binding below). CONTACT_FROM must be on the Email-Routing domain.
 [vars]
-CONTACT_TO = "hello@mae.gallery"
+CONTACT_TO = "maedeh.n.a@gmail.com"
 CONTACT_FROM = "noreply@mae.gallery"
 
-# --- NATIVE EMAIL SENDING (enable once you have a custom domain) -------------
-# `send_email` works through Cloudflare Email Routing, which requires a real
-# domain on your Cloudflare account (it can't run on *.workers.dev). To turn it
-# on:
-#   1. Add your domain to Cloudflare and enable Email Routing.
-#   2. Verify your inbox as a destination address.
-#   3. Set `destination_address` below to that verified inbox, uncomment, and
-#      redeploy. (Also point CONTACT_TO / CONTACT_FROM at your domain above.)
-#
-# [[send_email]]
-# name = "SEB"
-# destination_address = "you@your-real-domain.com"
+# --- NATIVE EMAIL SENDING ---------------------------------------------------
+# Sends via Cloudflare Email Routing. REQUIRES, on the mae.gallery zone:
+#   1. Email Routing enabled (Dashboard → mae.gallery → Email → Email Routing).
+#   2. maedeh.n.a@gmail.com added as a Destination address and VERIFIED.
+# The binding can only send to destination_address, so it equals CONTACT_TO.
+[[send_email]]
+name = "SEB"
+destination_address = "maedeh.n.a@gmail.com"
 # ----------------------------------------------------------------------------
