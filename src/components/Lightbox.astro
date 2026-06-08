@@ -25,7 +25,10 @@ const viewerData = portfolio.collections.map((c) => ({
     <button class="varrow" id="vPrev" type="button" aria-label="Previous work">‹</button>
     <div class="vframe-wrap">
       <figure class="vframe" id="vFrame">
-        <img id="vImg" alt="" />
+        <picture>
+          <source id="vSrcSm" type="image/webp" media="(max-width: 768px)" />
+          <img id="vImg" alt="" />
+        </picture>
       </figure>
     </div>
     <button class="varrow" id="vNext" type="button" aria-label="Next work">›</button>
@@ -51,6 +54,7 @@ const viewerData = portfolio.collections.map((c) => ({
   const vName = document.getElementById('vName')!;
   const vFrame = document.getElementById('vFrame') as HTMLElement;
   const vImg = document.getElementById('vImg') as HTMLImageElement;
+  const vSrcSm = document.getElementById('vSrcSm') as HTMLSourceElement;
   const vTitle = document.getElementById('vTitle')!;
   const vDim = document.getElementById('vDim')!;
   const vDots = document.getElementById('vDots')!;
@@ -70,8 +74,10 @@ const viewerData = portfolio.collections.map((c) => ({
     vFrame.style.height = 'auto';
     // Tall works fit the viewport height; wide works are capped at 86vw.
     vFrame.style.width = `min(86vw, ${(64 * w.ratio).toFixed(1)}vh)`;
+    // Phones (≤768px) get the lighter -sm variant; desktop gets full resolution.
+    vSrcSm.srcset = w.img.replace(/\.webp$/, '-sm.webp');
     vImg.src = w.img;
-    vImg.alt = `${w.title}, ${w.year}`;
+    vImg.alt = `${w.title}, ${w.medium.toLowerCase()} by Mae, ${w.year}`;
     vTitle.textContent = w.title;
     vDim.textContent = [w.medium, w.dim, w.year].filter(Boolean).join(' · ');
 

@@ -13,6 +13,56 @@ const {
 } = Astro.props;
 
 const year = new Date().getFullYear();
+
+// Absolute URL helper (falls back to the relative path if `site` is unset).
+const abs = (p: string) => (Astro.site ? new URL(p, Astro.site).href : p);
+const canonical = Astro.url ? abs(Astro.url.pathname) : undefined;
+// Dedicated 1200×630 social share card (see public/assets/og.jpg).
+const ogImage = abs('/assets/og.jpg');
+
+// schema.org structured data: the artist, the site, and each artwork.
+const personId = `${abs('/')}#mae`;
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Person',
+      '@id': personId,
+      name: portfolio.name,
+      alternateName: 'Maedeh Naderianvar',
+      jobTitle: portfolio.role,
+      description: portfolio.statement,
+      image: abs(portfolio.photo),
+      url: Astro.site ? abs('/') : undefined,
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: 'Turin',
+        addressCountry: 'IT',
+      },
+      knowsAbout: ['Acrylic painting', 'Contemporary figurative art', 'Persian art'],
+    },
+    {
+      '@type': 'WebSite',
+      '@id': `${abs('/')}#website`,
+      url: Astro.site ? abs('/') : undefined,
+      name: title,
+      inLanguage: 'en',
+      about: { '@id': personId },
+    },
+    ...portfolio.collections.flatMap((c) =>
+      c.works.map((w) => ({
+        '@type': 'VisualArtwork',
+        name: w.title,
+        artform: 'Painting',
+        artMedium: w.medium,
+        dateCreated: w.year,
+        image: abs(w.img),
+        creator: { '@id': personId },
+        isPartOf: c.title,
+      }))
+    ),
+  ],
+};
 ---
 
 <!doctype html>
@@ -22,13 +72,21 @@ const year = new Date().getFullYear();
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    {canonical && <link rel="canonical" href={canonical} />}
 
     <!-- Open Graph / social -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content={portfolio.photo} />
+    <meta property="og:image" content={ogImage} />
+    {canonical && <meta property="og:url" content={canonical} />}
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <!-- schema.org structured data -->
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 
@@ -43,7 +101,7 @@ const year = new Date().getFullYear();
     <slot />
     <footer>
       <span>{portfolio.name} — {portfolio.role}</span>
-      <span>© {year} · Milan</span>
+      <span>© {year} · Turin</span>
     </footer>
   </body>
 </html>

@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Update the domain here if you change `site` in astro.config.mjs.
+Sitemap: https://mae.gallery/sitemap.xml
