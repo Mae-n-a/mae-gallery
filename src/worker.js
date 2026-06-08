@@ -15,7 +15,7 @@
  */
 import { EmailMessage } from 'cloudflare:email';
 // Browser build avoids Node builtins (node:os / path) so it bundles for Workers.
-import { createMimeMessage } from 'mimetext/browser';
+import { createMimeMessage, Mailbox } from 'mimetext/browser';
 
 const json = (obj, status = 200) =>
   new Response(JSON.stringify(obj), {
@@ -89,7 +89,8 @@ async function handleContact(request, env) {
   const mime = createMimeMessage();
   mime.setSender({ name: 'Mae Gallery', addr: from });
   mime.setRecipient(to);
-  mime.setHeader('Reply-To', `${name} <${email}>`);
+  // Reply-To must be a Mailbox instance — setHeader (unlike setRecipient) does not wrap it.
+  mime.setHeader('Reply-To', new Mailbox({ addr: email, name }));
   mime.setSubject(`New enquiry from ${name}`);
   mime.addMessage({
     contentType: 'text/plain',
