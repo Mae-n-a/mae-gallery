@@ -154,7 +154,7 @@ footer { border-top: 1px solid var(--ink); padding: 30px 48px; display: flex; ju
 .varrow:hover { opacity: 1; }
 .varrow:focus-visible, .vclose:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
 .vframe-wrap { flex: 1; height: 100%; display: flex; align-items: center; justify-content: center; min-width: 0; }
-.vframe { max-width: 100%; box-shadow: 0 40px 80px -40px rgba(20,32,60,.5); position: relative; background: #dfe3ea; }
+.vframe { max-width: 100%; box-shadow: 0 40px 80px -40px rgba(20,32,60,.5); position: relative; background: #fff; }
 .vframe picture { display: block; width: 100%; height: 100%; }
 .vframe img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .vbottom { display: flex; justify-content: space-between; align-items: flex-end; padding: 22px 48px 30px; border-top: 1px solid var(--line); }
@@ -164,6 +164,23 @@ footer { border-top: 1px solid var(--ink); padding: 30px 48px; display: flex; ju
 .vdots button { width: 24px; height: 2px; background: var(--line); cursor: pointer; transition: .3s; border: 0; padding: 0; }
 .vdots button.on { background: var(--ink); }
 .vdots button:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
+
+/* SERIES CONTACT SHEET — tiled grid of all works in a series (opens before the lightbox). */
+.series { position: fixed; inset: 0; z-index: 70; background: var(--paper); display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: opacity .4s; }
+.series.open { opacity: 1; pointer-events: auto; }
+.series-scroll { flex: 1; overflow-y: auto; padding: 30px 48px 70px; }
+.series-grid { columns: 3 300px; column-gap: 22px; max-width: var(--maxw); margin: 0 auto; }
+.series-tile { display: block; width: 100%; margin: 0 0 22px; padding: 0; border: 0; background: none; cursor: pointer; text-align: left; break-inside: avoid; }
+.series-tile img { display: block; width: 100%; height: auto; background: #fff; box-shadow: 0 24px 50px -34px rgba(20,32,60,.5); transition: transform .4s ease; }
+.series-tile:hover img, .series-tile:focus-visible img { transform: scale(1.015); }
+.series-tile:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
+.series-tile figcaption { font-family: "Spectral", serif; font-size: 15px; margin-top: 10px; color: var(--ink); }
+.series-tile figcaption span { color: var(--steel); font-style: italic; margin-left: 8px; }
+@media (max-width: 900px) {
+  .series-scroll { padding: 22px 24px 50px; }
+  .series-grid { column-gap: 16px; }
+  .series-tile { margin-bottom: 16px; }
+}
 
 /* MOTION */
 .reveal { opacity: 0; transform: translateY(30px); transition: opacity 1s ease, transform 1s ease; }

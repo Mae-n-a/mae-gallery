@@ -1,0 +1,89 @@
+---
+import { portfolio } from '../data/portfolio';
+
+// Lightweight data for the contact-sheet grid: one entry per collection.
+const seriesData = portfolio.collections.map((c) => ({
+  title: c.title,
+  years: c.years,
+  works: c.works.map((w) => ({ title: w.title, year: w.year, ratio: w.ratio, img: w.img })),
+}));
+---
+
+<div class="series" id="seriesB" role="dialog" aria-modal="true" aria-label="Series" aria-hidden="true">
+  <div class="vtop">
+    <div class="vname" id="sName"></div>
+    <button class="vclose" id="sClose" type="button">Close ✕</button>
+  </div>
+  <div class="series-scroll">
+    <div class="series-grid" id="sGrid"></div>
+  </div>
+</div>
+
+<script type="application/json" id="seriesData" set:html={JSON.stringify(seriesData)}></script>
+
+<script>
+  type Work = { title: string; year: string; ratio: number; img: string };
+  type Coll = { title: string; years: string; works: Work[] };
+
+  const data: Coll[] = JSON.parse(document.getElementById('seriesData')!.textContent || '[]');
+
+  const overlay = document.getElementById('seriesB')!;
+  const sName = document.getElementById('sName')!;
+  const sGrid = document.getElementById('sGrid')!;
+  const sClose = document.getElementById('sClose')!;
+  const viewer = document.getElementById('viewerB'); // the single-image lightbox
+
+  let curC = 0;
+  let lastFocused: HTMLElement | null = null;
+
+  function render(ci: number) {
+    const c = data[ci];
+    sName.innerHTML = `${c.title} <em>${c.years}</em>`;
+    sGrid.innerHTML = c.works
+      .map((w, i) => {
+        const thumb = w.img.replace(/\.webp$/, '-sm.webp');
+        return `<button class="series-tile" type="button" data-i="${i}" aria-label="Open ${w.title}">
+          <img src="${thumb}" alt="${w.title}, ${w.year}" loading="lazy" decoding="async" />
+          <figcaption>${w.title}<span>${w.year}</span></figcaption>
+        </button>`;
+      })
+      .join('');
+    sGrid.querySelectorAll<HTMLButtonElement>('.series-tile').forEach((tile) => {
+      tile.addEventListener('click', () => {
+        const wi = Number(tile.dataset.i);
+        // Open the single-image lightbox on top (it handles prev/next within the series).
+        document.dispatchEvent(new CustomEvent('open-lightbox', { detail: { collectionIndex: curC, workIndex: wi } }));
+      });
+    });
+  }
+
+  function open(ci: number) {
+    lastFocused = document.activeElement as HTMLElement;
+    curC = ci;
+    render(ci);
+    overlay.classList.add('open');
+    overlay.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    document.querySelector('.series-scroll')!.scrollTop = 0;
+    sClose.focus();
+  }
+
+  function close() {
+    overlay.classList.remove('open');
+    overlay.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    lastFocused?.focus();
+  }
+
+  document.addEventListener('open-series', (e) => open((e as CustomEvent).detail.collectionIndex));
+
+  sClose.addEventListener('click', close);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (!overlay.classList.contains('open')) return;
+    // If the single-image lightbox is open on top, let it handle Escape first.
+    if (viewer?.classList.contains('open')) return;
+    close();
+  });
+</script>

@@ -39,9 +39,8 @@ const { collections } = portfolio;
   rows.forEach((row) => {
     const ci = Number(row.dataset.collection);
     row.addEventListener('click', () => {
-      document.dispatchEvent(
-        new CustomEvent('open-lightbox', { detail: { collectionIndex: ci, workIndex: 0 } })
-      );
+      // Open the series as a tiled contact-sheet first; tiles then open the lightbox.
+      document.dispatchEvent(new CustomEvent('open-series', { detail: { collectionIndex: ci } }));
     });
     if (fine) {
       row.addEventListener('mouseenter', () => {
