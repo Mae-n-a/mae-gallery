@@ -45,6 +45,9 @@ export type Portfolio = {
   education: CvEntry[];
   exhibitions: CvEntry[];
   statement: string;
+  /** Short (~155 char) summary for the <meta description> / Open Graph; the
+   *  full `statement` is too long for search snippets. */
+  metaDescription: string;
   collections: Collection[];
 };
 
@@ -52,6 +55,8 @@ export const portfolio: Portfolio = {
   name: 'Mae',
   role: 'Visual Artist',
   tagline: 'Acrylic paintings',
+  metaDescription:
+    'Mae is a Tehran-born visual artist and art educator based in Turin, Italy. Figurative painting, drawing and digital work on displacement, identity and emotion.',
   photo: '/assets/profile.webp',
   email: 'hello@mae.gallery',
   location: 'Turin, Italy',
@@ -73,7 +78,7 @@ export const portfolio: Portfolio = {
   ],
 
   statement:
-    'My work begins with memory. I paint the human figure in fresh, transparent acrylics, letting color carry the thought. The indigo and Persian blue of my homeland, Iran, meet the turquoise and red of emotion held in balance. The figures move lightly through the air, suspended between presence and disappearance.',
+    'Mae is a visual artist and art educator whose work explores figurative expression. Working across painting, drawing, photography, and digital media, she examines themes of displacement, identity, and emotional transformation. Her practice combines anatomical research, expressive mark-making, and layered imagery to create works that reflect personal narratives and the complexities of human emotion. Born in Tehran, Iran, Mae studied art in both Iran and Italy, earning a Master\'s degree in Painting from the Academy of Fine Arts of Brera in Milan. Now based in Turin, she brings a cross-cultural perspective to her artistic and educational practice, fostering dialogue between tradition, contemporary art, and creative learning.',
 
   collections: [
     {

@@ -9,7 +9,7 @@ interface Props {
 
 const {
   title = `${portfolio.name} — ${portfolio.role}`,
-  description = portfolio.statement,
+  description = portfolio.metaDescription,
 } = Astro.props;
 
 const year = new Date().getFullYear();
