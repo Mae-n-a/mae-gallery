@@ -1,0 +1,35 @@
+name: Deploy to Cloudflare
+
+# Auto-deploy on every push to main (and a manual "Run workflow" button).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# One deploy at a time; cancel an in-flight run if a newer push arrives.
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # `wrangler deploy` runs the [build] hook in wrangler.toml (npm run build),
+      # so this both builds the Astro site and deploys the Worker + assets.
+      - name: Deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy
