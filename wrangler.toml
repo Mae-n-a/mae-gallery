@@ -11,6 +11,12 @@ compatibility_date = "2025-01-01"
 # would bypass the Access policy.)
 workers_dev = false
 
+# Build the Astro site before deploying. This runs as part of `wrangler deploy`,
+# so Cloudflare Workers Builds (whose default deploy command is `npx wrangler
+# deploy`) produces ./dist with no dashboard build-command needed.
+[build]
+command = "npm run build"
+
 # Serve the site on the apex domain (Cloudflare provisions the DNS record + TLS
 # cert automatically on deploy). The domain's zone must be on this account.
 routes = [
