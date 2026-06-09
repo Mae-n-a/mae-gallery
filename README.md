@@ -1,40 +1,44 @@
 # Mae — Artist Portfolio (Astro)
 
-Editorial single-page portfolio for **Mae**, a visual artist working in acrylic.
-Rebuilt from the design handoff prototype as a static [Astro](https://astro.build)
-site, deployed as a **Cloudflare Worker** that serves the static build and
-handles the contact form with Cloudflare's **native email sending**.
-
-The original design reference lives untouched in
-`design_handoff_editorial_portfolio/` for comparison.
+Editorial single-page portfolio for **Mae**, a visual artist and art educator.
+A static [Astro](https://astro.build) site deployed as a **Cloudflare Worker**
+that serves the build and runs a contact pipeline (spam filtering + D1 storage +
+native email). Live at **https://mae.gallery**.
 
 ## Stack
 
-- **Astro 4** — static output, zero client framework (just small vanilla scripts).
-- **Cloudflare Workers** — static assets + a Worker for the contact form, which
-  sends mail via the native `send_email` binding (no third-party service).
+- **Astro 4** — static output, no client framework (just small vanilla scripts).
+- **Cloudflare Workers** — serves `./dist` via the `[assets]` binding; the Worker
+  handles `/api/contact` and an Access-protected `/admin` dashboard.
+- **Cloudflare D1** — every contact submission is stored (`mae-gallery-db`).
+- **Cloudflare Turnstile** + in-Worker heuristics — anti-bot / spam filtering.
+- **send_email** (Email Routing) — native email, no third-party service.
+- **Cloudflare Web Analytics** — privacy-friendly, cookieless.
 - Content is one typed file: [`src/data/portfolio.ts`](src/data/portfolio.ts).
 
 ## Project structure
 
 ```
 src/
-  data/portfolio.ts      ← all content (artist, CV, 4 collections, 29 works)
-  layouts/Base.astro     ← <head>, fonts, SEO/OG meta, footer
+  data/portfolio.ts      ← all content (artist, bio, CV, 4 collections, 27 works)
+  layouts/Base.astro     ← <head>, fonts, SEO/OG meta, JSON-LD, analytics, footer
   components/
-    Nav.astro            ← sticky header + mobile "Index" menu
-    Hero.astro           ← animated name, portrait, meta
+    Nav.astro            ← centered sticky header + mobile menu
+    Hero.astro           ← animated name, portrait, "Based in"
     Gallery.astro        ← numbered series index + cursor-follow preview
+    SeriesGrid.astro     ← tiled contact-sheet of a series (opens before lightbox)
     About.astro          ← statement + CV (education / exhibitions)
-    Contact.astro        ← accessible form, posts to /api/contact
-    Lightbox.astro       ← full-screen viewer (keyboard, focus trap, dots)
+    Contact.astro        ← accessible form (+ Turnstile), posts to /api/contact
+    Lightbox.astro       ← full-screen viewer (responsive <picture>, keyboard, dots)
   pages/index.astro      ← assembles the page + reveal-on-scroll
   styles/global.css      ← design tokens + all styles
-  worker.js              ← Cloudflare Worker: serves the build + /api/contact
+  worker.js              ← Worker: /api/contact pipeline + /admin dashboard
 public/
-  assets/                ← paintings + profile photo
-  favicon.svg
-wrangler.toml            ← Worker config (assets + send_email binding)
+  assets/paintings/      ← WebP works: <slug>-NN.webp + -NN-sm.webp (mobile)
+  assets/profile.webp, assets/og.jpg, robots.txt, sitemap.xml, favicon.svg
+schema.sql               ← D1 submissions table
+wrangler.toml            ← Worker config (assets, D1, send_email, Access, [build] hook)
+.github/workflows/deploy.yml  ← auto-deploy to Cloudflare on push to main
 ```
 
 ## Develop
@@ -42,56 +46,55 @@ wrangler.toml            ← Worker config (assets + send_email binding)
 ```bash
 npm install
 npm run dev        # Astro dev server (UI work) → http://localhost:4321
-npm run cf-dev     # build + `wrangler dev` → full Worker incl. /api/contact (:8787)
+npm run cf-dev     # build + `wrangler dev` → full Worker incl. /api/contact
 ```
 
-Use `npm run dev` for fast UI iteration; use `npm run cf-dev` to exercise the
-contact endpoint under the real Worker runtime.
+## Deploy
 
-## Build & deploy (Cloudflare Workers)
+**Automatic:** every push to `main` builds and deploys via GitHub Actions
+(`.github/workflows/deploy.yml`), using repo secrets `CLOUDFLARE_API_TOKEN` and
+`CLOUDFLARE_ACCOUNT_ID`.
+
+**Manual:**
 
 ```bash
-npm run build      # static site → ./dist
-npm run deploy     # build + `wrangler deploy`
+npm run deploy     # = wrangler deploy; the wrangler.toml [build] hook runs the Astro build
 ```
 
-First time: `npx wrangler login`, then `npm run deploy`. The site goes live at
-`mae-gallery.<your-subdomain>.workers.dev`. (You can also connect the repo via
-Cloudflare's **Workers Builds** for Git-based deploys.)
+The custom domain (`mae.gallery`) is configured as a route in `wrangler.toml`.
 
-### The contact email — Cloudflare native `send_email`
+## Contact pipeline (`src/worker.js`)
 
-The Worker (`src/worker.js`) sends mail with Cloudflare's built-in `send_email`
-binding — **no API key, no third-party service**. It validates input, traps bots
-with a honeypot, and sets `Reply-To` to the visitor so you reply directly.
+`POST /api/contact` →
+1. **Sanitize** — strip control chars (header-injection safe), length caps.
+2. **Turnstile** — verify the anti-bot token (skipped until `TURNSTILE_SECRET` set).
+3. **Spam score** — in-Worker heuristics (links, spam terms, markup, caps, …) + honeypot.
+4. **Store** — every submission is written to **D1** (spam or not).
+5. **Email** — `send_email` forwards to the verified inbox **only if not flagged spam**.
 
-**It needs a custom domain to actually deliver.** `send_email` works through
-Cloudflare **Email Routing**, which can only be enabled on a real domain you've
-added to Cloudflare — *not* on `*.workers.dev`. Until then the form returns a
-graceful "not configured" and the UI falls back to the `mailto:` link.
+Email uses Cloudflare **Email Routing** on `mae.gallery` (no API key). It can only
+deliver to the verified destination (the owner) — not to the visitor.
 
-To turn email on once you have a domain:
+### Admin dashboard — `/admin`
 
-1. Add the domain to Cloudflare → **Email → Email Routing → Enable**.
-2. **Verify your inbox** as a destination address.
-3. In `wrangler.toml`, uncomment the `[[send_email]]` block and set
-   `destination_address` to that verified inbox; point `CONTACT_TO` /
-   `CONTACT_FROM` at the domain.
-4. `npm run deploy`.
-
-> **Limitation vs. an API sender:** `send_email` can only deliver to your
-> *verified* address (i.e. you). It can't send a confirmation email to the
-> visitor. That's exactly right for "email me each enquiry," but if you ever want
-> visitor autoresponders you'd add a service like Resend instead.
+Lists every submission (HTML-escaped, spam badges, emailed status). Protected by
+**Cloudflare Access** — the Worker verifies the `Cf-Access-Jwt-Assertion` JWT, and
+`workers_dev = false` removes the bypass URL. It returns **403 until Access is
+configured**: create an Access app for `mae.gallery/admin`, then set
+`ACCESS_TEAM_DOMAIN` and `ACCESS_AUD` in `wrangler.toml` and redeploy.
 
 ## Editing content
 
-Everything is in `src/data/portfolio.ts`. To add a work, drop the image in
-`public/assets/paintings/<series>/`, add an entry with its `ratio`
-(width ÷ height — the lightbox sizing depends on it), and rebuild.
+Everything is in `src/data/portfolio.ts`. To add a work:
 
-### Carried-over TODOs from the handoff
+1. Convert the source image to WebP with `cwebp` — a full size (long edge ≈2048)
+   and a mobile `-sm` variant (long edge ≈1280); name them descriptively (e.g.
+   `mae-blue-acrylic-painting-09.webp`).
+2. Drop both in `public/assets/paintings/<series>/`.
+3. Add an entry with the correct `ratio` (width ÷ height — drives lightbox sizing).
 
-- Work **titles** are placeholders (`Exile I…V` etc.) — replace with real titles.
+## Carried-over TODOs
+
+- Work **titles** are placeholders (`Exile I…`, `Blue I…`) — replace with real titles.
 - **Dimensions** are `null` (captions show `medium · year`); set `dim` to show them.
-- **Years** were inferred from signatures — confirm.
+- **Years** were inferred — confirm.
