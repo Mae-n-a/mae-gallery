@@ -78,7 +78,7 @@ export const portfolio: Portfolio = {
   ],
 
   statement:
-    'Mae is a visual artist and art educator working across painting, drawing, photography, and digital media. Through the human figure she explores displacement, identity, and emotional transformation, combining anatomical research with expressive, layered mark-making. Born in Tehran and trained in Iran and at the Brera Academy in Milan, she now works in Turin, bringing a cross-cultural perspective to her art and teaching.',
+    'Mae is a visual artist and art educator working across painting, drawing, photography, and digital media. Born in Tehran and trained in Iran and at the Brera Academy in Milan, she now works in Turin, bringing a cross-cultural perspective to her art and teaching.',
 
   collections: [
     {
