@@ -78,7 +78,7 @@ export const portfolio: Portfolio = {
   ],
 
   statement:
-    'Mae is a visual artist and art educator whose work explores figurative expression. Working across painting, drawing, photography, and digital media, she examines themes of displacement, identity, and emotional transformation. Her practice combines anatomical research, expressive mark-making, and layered imagery to create works that reflect personal narratives and the complexities of human emotion. Born in Tehran, Iran, Mae studied art in both Iran and Italy, earning a Master\'s degree in Painting from the Academy of Fine Arts of Brera in Milan. Now based in Turin, she brings a cross-cultural perspective to her artistic and educational practice, fostering dialogue between tradition, contemporary art, and creative learning.',
+    'Mae is a visual artist and art educator working across painting, drawing, photography, and digital media. Through the human figure she explores displacement, identity, and emotional transformation, combining anatomical research with expressive, layered mark-making. Born in Tehran and trained in Iran and at the Brera Academy in Milan, she now works in Turin, bringing a cross-cultural perspective to her art and teaching.',
 
   collections: [
     {
