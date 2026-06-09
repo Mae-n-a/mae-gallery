@@ -6,6 +6,11 @@ name = "mae-gallery"
 main = "src/worker.js"
 compatibility_date = "2025-01-01"
 
+# Disable the *.workers.dev URL so the only entrypoint is the custom domain,
+# where Cloudflare Access guards /admin. (Without this, the workers.dev URL
+# would bypass the Access policy.)
+workers_dev = false
+
 # Serve the site on the apex domain (Cloudflare provisions the DNS record + TLS
 # cert automatically on deploy). The domain's zone must be on this account.
 routes = [
@@ -24,6 +29,20 @@ binding = "ASSETS"
 [vars]
 CONTACT_TO = "maedeh.n.a@gmail.com"
 CONTACT_FROM = "noreply@mae.gallery"
+# Cloudflare Access protects /admin. Fill these after creating the Access app
+# (Zero Trust → Access → Applications). AUD = the application's Application Audience tag.
+ACCESS_TEAM_DOMAIN = "REPLACE_WITH_TEAM.cloudflareaccess.com"
+ACCESS_AUD = "REPLACE_WITH_APPLICATION_AUD_TAG"
+
+# Contact-form submissions are stored here (all of them); only non-spam is emailed.
+[[d1_databases]]
+binding = "DB"
+database_name = "mae-gallery-db"
+database_id = "4c9e4217-ebc9-4cbe-89b1-b1bc9e6e47c3"
+
+# Turnstile (anti-bot) secret key is a Worker SECRET, not a var:
+#   npx wrangler secret put TURNSTILE_SECRET
+# The matching site key (public) lives in src/components/Contact.astro.
 
 # --- NATIVE EMAIL SENDING ---------------------------------------------------
 # Sends via Cloudflare Email Routing. REQUIRES, on the mae.gallery zone:

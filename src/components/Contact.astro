@@ -1,6 +1,11 @@
 ---
 import { portfolio } from '../data/portfolio';
 const { email, location } = portfolio;
+
+// Paste your Cloudflare Turnstile SITE key here to enable the anti-bot widget.
+// Leave empty to disable it (the form still works; the Worker skips Turnstile
+// until its TURNSTILE_SECRET is also set). The site key is public — safe to commit.
+const TURNSTILE_SITEKEY = '';
 ---
 
 <section id="contact">
@@ -33,11 +38,18 @@ const { email, location } = portfolio;
         <label for="cf-company">Company</label>
         <input id="cf-company" name="company" type="text" tabindex="-1" autocomplete="off" />
       </div>
+      {TURNSTILE_SITEKEY && (
+        <div class="cf-turnstile" data-sitekey={TURNSTILE_SITEKEY} data-theme="light" style="margin-bottom:24px"></div>
+      )}
       <button class="submit" type="submit">Send Message</button>
       <p class="form-status" id="formStatus" role="status" aria-live="polite"></p>
     </form>
   </div>
 </section>
+
+{TURNSTILE_SITEKEY && (
+  <script is:inline async defer src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script>
+)}
 
 <script>
   const form = document.getElementById('formB') as HTMLFormElement | null;
@@ -69,6 +81,8 @@ const { email, location } = portfolio;
       }, 2200);
     } catch (err) {
       if (btn) { btn.disabled = false; btn.textContent = 'Send Message'; }
+      // Turnstile tokens are single-use — reset the widget so a retry gets a fresh one.
+      (window as any).turnstile?.reset?.();
       status.dataset.state = 'error';
       status.textContent = 'Something went wrong. Please email hello@mae.gallery directly.';
     }

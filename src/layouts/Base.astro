@@ -14,6 +14,13 @@ const {
 
 const year = new Date().getFullYear();
 
+// Cloudflare Web Analytics: paste the beacon token from the dashboard
+// (Analytics & Logs → Web Analytics → your site → JS snippet → the "token").
+// Leave empty to disable. Privacy-friendly + cookieless. Alternatively, since
+// the site is Cloudflare-proxied, you can enable automatic setup in the
+// dashboard with zero code and leave this blank.
+const ANALYTICS_TOKEN = '';
+
 // Absolute URL helper (falls back to the relative path if `site` is unset).
 const abs = (p: string) => (Astro.site ? new URL(p, Astro.site).href : p);
 const canonical = Astro.url ? abs(Astro.url.pathname) : undefined;
@@ -103,5 +110,13 @@ const jsonLd = {
       <span>{portfolio.name} — {portfolio.role}</span>
       <span>© {year} · Turin</span>
     </footer>
+    {ANALYTICS_TOKEN && (
+      <script
+        is:inline
+        defer
+        src="https://static.cloudflareinsights.com/beacon.min.js"
+        data-cf-beacon={JSON.stringify({ token: ANALYTICS_TOKEN })}
+      />
+    )}
   </body>
 </html>
