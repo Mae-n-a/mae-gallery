@@ -87,6 +87,7 @@ section { padding: 130px 0; position: relative; }
 .sec-title { font-family: "Spectral", serif; font-weight: 400; font-size: clamp(40px, 5vw, 64px); line-height: 1; margin-top: 8px; }
 .sec-head { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--ink); padding-bottom: 22px; margin-bottom: 8px; }
 .sec-head .right { max-width: 300px; text-align: right; color: var(--muted); font-size: 13px; font-family: "Spectral", serif; line-height: 1.5; }
+.sec-head .right.oneline { max-width: none; white-space: nowrap; }
 
 /* GALLERY INDEX */
 .index-row {
@@ -179,6 +180,9 @@ footer { border-top: 1px solid var(--ink); padding: 30px 48px; display: flex; ju
   .series-scroll { padding: 22px 24px 50px; }
   .series-grid { column-gap: 16px; }
   .series-tile { margin-bottom: 16px; }
+  .sec-head { flex-direction: column; align-items: flex-start; gap: 14px; }
+  .sec-head .right { text-align: left; max-width: none; }
+  .sec-head .right.oneline { white-space: normal; }
 }
 
 /* MOTION */
