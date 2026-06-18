@@ -21,3 +21,7 @@ Thumbs.db
 
 # claude code local state
 .claude/
+
+# Playwright MCP scratch
+.playwright-mcp/
+gallery-mobile.png
