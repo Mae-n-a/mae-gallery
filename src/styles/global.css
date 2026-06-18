@@ -56,7 +56,6 @@ nav a {
   text-transform: uppercase; color: var(--ink); text-decoration: none;
   display: flex; gap: 7px; align-items: baseline;
 }
-nav a .n { color: var(--steel); font-size: 10px; }
 nav a:hover { color: var(--steel); }
 .menu-btn {
   display: none; background: none; border: 0; cursor: pointer;

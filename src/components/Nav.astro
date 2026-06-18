@@ -1,9 +1,9 @@
 ---
 const links = [
-  { n: '01', label: 'Home', href: '#home' },
-  { n: '02', label: 'Gallery', href: '#gallery' },
-  { n: '03', label: 'About', href: '#about' },
-  { n: '04', label: 'Contact', href: '#contact' },
+  { label: 'Home', href: '#home' },
+  { label: 'Gallery', href: '#gallery' },
+  { label: 'About', href: '#about' },
+  { label: 'Contact', href: '#contact' },
 ];
 ---
 
@@ -13,7 +13,7 @@ const links = [
     <ul id="navlist">
       {links.map((l) => (
         <li>
-          <a href={l.href}><span class="n">{l.n}</span> {l.label}</a>
+          <a href={l.href}>{l.label}</a>
         </li>
       ))}
     </ul>
